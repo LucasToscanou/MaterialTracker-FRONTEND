@@ -1,0 +1,66 @@
+.logo-container {
+    margin: 20px 0;
+}
+
+.logo {
+    width: 50%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.intro-text {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    text-align: justify;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.button {
+    background-color: #9b1414;
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.datetime {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+
+.index-hero {
+    position: relative;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url('../images/container_yard_4.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+
+.index-hero-text{
+    -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  border-radius: 10px;
+}
+
+.text-center {
+    margin: auto 20%;
+}

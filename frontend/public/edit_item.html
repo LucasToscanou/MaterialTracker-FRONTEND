@@ -1,0 +1,53 @@
+{% extends 'MaterialTrackerApp/item_base.html' %}
+{% load static %}
+
+{% block head %}
+<title>Edit Item</title>
+{% endblock %}
+
+{% block subtitle %}
+edit item
+{% endblock %}
+
+{%block photo %}
+{% if material.main_img %}
+  <img src="{{ material.main_img.url }}" alt="Material photo" class="img-thumbnail">
+{% else %}
+  <img src="{% static 'img/MaterialTrackerApp/generic_item.jpg' %}" alt="Material photo" class="img-thumbnail">
+{% endif %}
+{% endblock %}
+
+{%block field_reference %}
+value={{material.ref}}
+{% endblock %}
+
+{%block field_description %}
+value={{material.description}}
+{% endblock %}
+
+{%block field_capacity %}
+{% if c.id == material.capacity.id %}selected{% endif %}
+{% endblock %}
+
+{%block field_project %}
+{% if p.id == material.project.id %}selected{% endif %}
+{% endblock %}
+
+{%block field_current_location %}
+{% if loc.id == material.current_location.id %}selected{% endif %}
+{% endblock %}
+
+{%block field_cost %}
+value={{material.cost}}
+{% endblock %}
+
+{%block field_currency %}
+{% if c.id == material.currency.id %}selected{% endif %}
+{% endblock %}
+
+{%block field_quality_exp_date %}
+value={{ material.quality_exp_date|date:'Y-m-d' }}
+{% endblock %}
+
+{%block submit_btn %}Save changes{% endblock %}
+

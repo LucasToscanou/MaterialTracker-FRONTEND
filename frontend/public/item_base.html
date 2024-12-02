@@ -1,0 +1,165 @@
+{% extends 'MaterialTrackerApp/base.html' %}
+{% load static %}
+
+  {% block content %}
+  <div class="content">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-0 mx-5">
+      <h1 class="display-5 fw-bolder text-body-emphasis me-auto">Inventory - {% block subtitle %}{% endblock %}</h1>
+      <p class="datetime mb-0">Last update: {% now "Y-m-d H:i:s" %}</p>
+      
+      <form method="post" action="">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger" name="action" value="cancel">Cancel</button>
+      </form>
+    </div>
+    
+    <hr />
+    
+    <div class="container">
+      <main>
+        <div class="row justify-content-center">
+          
+          <div class="col-10">
+            <h4 class="mb-3">Material details</h4>
+            <form class="needs-validation" novalidate="" method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-4">
+                  <div class="col">
+                    {%block photo %}{% endblock %}
+                  </div>
+                  <div class="col">
+                    <label for="photo">Photo</label>
+                    <input type="file" class="form-control" id="photo" name="photo">
+                  </div>
+                  
+                </div>
+                
+                <div class="col">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <label for="reference" class="form-label">Reference</label>
+                      <input type="text" class="form-control" id="reference" name="reference" placeholder="E.g. ABC_123" 
+                      {% block field_reference %}{% endblock %}>
+                      <div class="invalid-feedback">
+                        Valid reference is required.
+                      </div>
+                    </div>
+                    
+                    <div class="col">
+                      <label for="capacity">Capacity</label>
+                      <select class="custom-select d-block w-100" id="capacity" name="capacity">
+                        <option id="placeholder">Choose...</option>
+                        {% for c in capacities %}
+                        <option value="{{ c }}" {% block field_capacity %}{% endblock %}>{{ c }}</option>
+                        {% endfor %}
+                      </select>
+                      <div class="invalid-feedback">
+                        Please select a valid capacity.
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="row">
+                    <div class="col">
+                      <label for="description" class="form-label">Description</label>
+                      <input type="text" class="form-control" id="description" name="description" placeholder="" 
+                      {% block field_description %}{% endblock %}>
+                      <div class="invalid-feedback">
+                        Valid description is required.
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="row">
+                    <div class="col">
+                      <label for="project">Project</label>
+                      <select class="custom-select d-block w-100" id="project" name="project">
+                        <option id="placeholder">Choose...</option>
+                        {% for p in projects %}
+                        <option value="{{ p.id }}" {% block field_project %}{% endblock %}>{{ p.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                      <div class="invalid-feedback">
+                        Please select a valid project.
+                      </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="current_location">Current location</label>
+                      <select class="custom-select d-block w-100" id="current_location" name="current_location">
+                        <option id="placeholder">Choose...</option>
+                        {% for loc in locations %}
+                        <option value="{{ loc.id }}" {% block field_current_location %}{% endblock %}>
+                          {{loc.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                      <div class="invalid-feedback">
+                        Please provide a valid location.
+                      </div>
+                    </div>
+
+                    
+                  </div>
+
+                  <div class="row align-items-center">
+  
+                    <div class="col-auto">
+                      <label for="cost" class="form-label">Cost</label>
+                      <div class="input-group has-validation">
+                        <input type="number" class="form-control" id="cost" name="cost" placeholder="123.12"
+                          {% block field_cost %}{% endblock %}>
+                        <div class="invalid-feedback">
+                          The item's cost is required.
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-auto">
+                      <label for="currency">Currency</label>
+                      <select class="custom-select d-block w-100" id="currency" name="currency">
+                        <option id="placeholder">Choose...</option>
+                        {% for c in currencies %}
+                            <option value="{{ c.id }}" {% block field_currency %}{% endblock %}>{{ c.name }}</option>
+                        {% endfor %}
+                      </select>
+                      <div class="invalid-feedback">
+                          Please select a valid currency.
+                      </div>
+                    </div>
+                  
+                    <div class="col-auto ms-auto">
+                      <label for="quality_exp_date">Quality expiration date</label>
+                      <input type="date" class="form-control" id="quality_exp_date" name="quality_exp_date" placeholder=""
+                              {% block field_quality_exp_date %}{% endblock %}>
+                      <div class="invalid-feedback">
+                          Enter a valid date.
+                      </div>
+                    </div>
+                  
+                </div>
+                
+
+              </div>
+              <div class="row justify-content-end">
+                <div class="col-4">
+                  <button class="btn btn-primary btn-lg" type="submit" name="action" value="save">{% block submit_btn %}{% endblock %}</button>
+                </div>  
+              </div>
+              
+              <hr class="my-4">
+
+            </form>
+
+          </div>
+        </div>
+      </main>
+    </div>
+
+
+
+
+  </div>
+  {% endblock %}

@@ -1,0 +1,72 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+}
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    /* background-image: url('../../img/MaterialTrackerApp/triangle-mosaic.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center; */
+    background-color: #fff;
+
+    display: block;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Ensure the content is centered vertically */
+}
+
+
+.dev_navbar {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex; 
+    align-items: center;  /* Center items vertically */
+    border-radius: 5px; 
+}
+
+.dev_nav-link {
+    margin-right: 20px;
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    font-size: 16px; 
+    transition: color 0.3s, transform 0.2s;
+    display: flex; /* Make the link a flex container */
+    align-items: center; /* Center content vertically */
+    padding: 10px; /* Add padding for better clickability */
+}
+
+.dev_nav-link:hover {
+    color: #9b1414;
+    transform: scale(1.05); 
+}
+
+.dev_nav-link:active {
+    color: #9b1414; 
+    transform: scale(0.95); 
+}
+
+.dev_nav-link:last-child {
+    margin-right: 0;
+}
+
+.user-info {
+    margin-left: auto;        /* Push user info to the right */
+    font-weight: bold;        /* Make the text bold */
+    color: #9b1414;           /* Match the text color */
+    display: flex;            /* Make the user info a flex container */
+    align-items: center;      /* Center content vertically */
+}
