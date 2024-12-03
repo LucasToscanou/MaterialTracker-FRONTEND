@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const heroSection = document.querySelector(".index-hero-text");
     if (isAuthenticated) {
         // User is authenticated
-        profileImage.src = "/path/to/profile/photo.jpg";
+        profileImage.src = "../images/generic_user.png";
         profileName.textContent = username;
         dropdownMenu.innerHTML = `
             <li><a class="dropdown-item" href="/passwordChange.html">Change password</a></li>

@@ -22,12 +22,12 @@ let fieldoptions: {
 };
 const initializePage = async (): Promise<void> => {
     fieldoptions = await getFieldOptions();
-    fillHTMLElements();
+    // fillHTMLElements();
+    fillCurrentFields();
 };
 
 // Call initializePage when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", initializePage);
-
 
 export const getFieldOptions = async (): Promise<{
     userProfiles: any[] | null;
@@ -59,7 +59,7 @@ export const getFieldOptions = async (): Promise<{
                 return await response.json();
             } else {
                 console.warn(`Failed to fetch ${modelName}:`, response.statusText);
-                return null;
+                throw new Error('Failed to fetch material');
             }
         } catch (error) {
             console.error(`Error fetching ${modelName}:`, error);
@@ -81,8 +81,23 @@ export const getFieldOptions = async (): Promise<{
     return data;
 };
 
+const fillCurrentFields = async (): Promise<void> => {
+    let materialId = 0;
+    let material: Material | null = null;
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        materialId = parseInt(urlParams.get('id') || '0');
+        try {
+            material = await getItem(materialId);
+        } catch (error) {
+            console.error('Error in example usage:', error);
+        }
+        console.log('Fetched Material:', material);
+    } catch (error) {
+        console.error('Error in example usage:', error);
+    }
 
-const fillHTMLElements = (): void => {
+    const user = localStorage.getItem('user');
     const projectSelect = document.getElementById("project") as HTMLSelectElement;
     const locationSelect = document.getElementById("currentLocation") as HTMLSelectElement;
     const currencySelect = document.getElementById("currency") as HTMLSelectElement;
@@ -92,6 +107,9 @@ const fillHTMLElements = (): void => {
             const option = document.createElement("option");
             option.value = project.id.toString();
             option.textContent = project.name;
+            if (project.id === material?.project) {
+                option.selected = true;
+            }
             projectSelect.appendChild(option);
         });
     }
@@ -101,6 +119,9 @@ const fillHTMLElements = (): void => {
             const option = document.createElement("option");
             option.value = location.id.toString();
             option.textContent = location.name;
+            if (location.id === material?.current_location) {
+                option.selected = true;
+            }
             locationSelect.appendChild(option);
         });
     }
@@ -110,8 +131,18 @@ const fillHTMLElements = (): void => {
             const option = document.createElement("option");
             option.value = currency.id.toString();
             option.textContent = currency.name;
+            if (currency.id === material?.currency) {
+                option.selected = true;
+            }
             currencySelect.appendChild(option);
         });
+    }
+
+    if (material) {
+        (document.getElementById("reference") as HTMLInputElement).value = material.ref;
+        (document.getElementById("description") as HTMLInputElement).value = material.description;
+        (document.getElementById("cost") as HTMLInputElement).value = material.cost.toString();
+        (document.getElementById("qualityExpDate") as HTMLInputElement).value = new Date(material.quality_exp_date).toISOString().split('T')[0];
     }
 
     const cancelButton = document.getElementById("cancelButton")!;
@@ -122,7 +153,7 @@ const fillHTMLElements = (): void => {
     const saveButton = document.getElementById("saveButton")!;
     saveButton.addEventListener("click", async (event) => {
         event.preventDefault();
-    
+
         const reference = (document.getElementById("reference") as HTMLInputElement).value;
         const description = (document.getElementById("description") as HTMLInputElement).value;
         const projectId = (document.getElementById("project") as HTMLSelectElement).value;
@@ -144,19 +175,19 @@ const fillHTMLElements = (): void => {
         };
 
         console.log('New Material:', newMaterial);
-    
+
         const token = localStorage.getItem('token');
-    
+
         try {
-            const response = await fetch(`${backendAddress}material/create/`, {
-                method: 'POST',
+            const response = await fetch(`${backendAddress}material/list/${materialId}/`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': tokenKeyword + token
                 },
                 body: JSON.stringify(newMaterial)
             });
-    
+
             if (response.ok) {
                 alert("Item added successfully!");
                 window.location.href = "/inventory.html";
@@ -171,3 +202,25 @@ const fillHTMLElements = (): void => {
     });
 };
 
+const getItem = async (id: number): Promise<Material> => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch(`${backendAddress}material/list/${id}/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': tokenKeyword + token,
+            },
+        });
+
+        if (response.ok) {
+            return await response.json();
+        } else {
+            console.error('Failed to fetch material:', response.statusText);
+            throw new Error('Failed to fetch material');
+        }
+    } catch (error) {
+        console.error('Error fetching material:', error);
+        throw error;
+    }
+};

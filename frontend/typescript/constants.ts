@@ -37,6 +37,7 @@ export interface Material {
     quality_exp_date: string;
 }
 
+
 export interface MaterialImg {
     id: number;
     material: number; // Material ID

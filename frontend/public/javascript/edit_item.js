@@ -14,7 +14,8 @@ let fieldoptions = {
 };
 const initializePage = async () => {
     fieldoptions = await getFieldOptions();
-    fillHTMLElements();
+    // fillHTMLElements();
+    fillCurrentFields();
 };
 // Call initializePage when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", initializePage);
@@ -40,7 +41,7 @@ export const getFieldOptions = async () => {
             }
             else {
                 console.warn(`Failed to fetch ${modelName}:`, response.statusText);
-                return null;
+                throw new Error('Failed to fetch material');
             }
         }
         catch (error) {
@@ -59,7 +60,24 @@ export const getFieldOptions = async () => {
     console.log('Fetched Data:', data);
     return data;
 };
-const fillHTMLElements = () => {
+const fillCurrentFields = async () => {
+    let materialId = 0;
+    let material = null;
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        materialId = parseInt(urlParams.get('id') || '0');
+        try {
+            material = await getItem(materialId);
+        }
+        catch (error) {
+            console.error('Error in example usage:', error);
+        }
+        console.log('Fetched Material:', material);
+    }
+    catch (error) {
+        console.error('Error in example usage:', error);
+    }
+    const user = localStorage.getItem('user');
     const projectSelect = document.getElementById("project");
     const locationSelect = document.getElementById("currentLocation");
     const currencySelect = document.getElementById("currency");
@@ -68,6 +86,9 @@ const fillHTMLElements = () => {
             const option = document.createElement("option");
             option.value = project.id.toString();
             option.textContent = project.name;
+            if (project.id === (material === null || material === void 0 ? void 0 : material.project)) {
+                option.selected = true;
+            }
             projectSelect.appendChild(option);
         });
     }
@@ -76,6 +97,9 @@ const fillHTMLElements = () => {
             const option = document.createElement("option");
             option.value = location.id.toString();
             option.textContent = location.name;
+            if (location.id === (material === null || material === void 0 ? void 0 : material.current_location)) {
+                option.selected = true;
+            }
             locationSelect.appendChild(option);
         });
     }
@@ -84,8 +108,17 @@ const fillHTMLElements = () => {
             const option = document.createElement("option");
             option.value = currency.id.toString();
             option.textContent = currency.name;
+            if (currency.id === (material === null || material === void 0 ? void 0 : material.currency)) {
+                option.selected = true;
+            }
             currencySelect.appendChild(option);
         });
+    }
+    if (material) {
+        document.getElementById("reference").value = material.ref;
+        document.getElementById("description").value = material.description;
+        document.getElementById("cost").value = material.cost.toString();
+        document.getElementById("qualityExpDate").value = new Date(material.quality_exp_date).toISOString().split('T')[0];
     }
     const cancelButton = document.getElementById("cancelButton");
     cancelButton.addEventListener("click", () => {
@@ -116,8 +149,8 @@ const fillHTMLElements = () => {
         console.log('New Material:', newMaterial);
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`${backendAddress}material/create/`, {
-                method: 'POST',
+            const response = await fetch(`${backendAddress}material/list/${materialId}/`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': tokenKeyword + token
@@ -138,4 +171,26 @@ const fillHTMLElements = () => {
             alert("An error occurred. Please try again.");
         }
     });
+};
+const getItem = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch(`${backendAddress}material/list/${id}/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': tokenKeyword + token,
+            },
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            console.error('Failed to fetch material:', response.statusText);
+            throw new Error('Failed to fetch material');
+        }
+    }
+    catch (error) {
+        console.error('Error fetching material:', error);
+        throw error;
+    }
 };

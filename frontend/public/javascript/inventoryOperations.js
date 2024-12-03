@@ -10,6 +10,7 @@ function clearSelection() {
 function updateSelectedCount() {
     const selectedCountElement = document.getElementById('qty-selected');
     const selectedCount = getSelectedItems().length;
+    console.log("selectedCount:", selectedCount);
     if (selectedCountElement) {
         if (selectedCount === 0) {
             selectedCountElement.innerText = '';
@@ -93,4 +94,8 @@ function getSelectedItems() {
     const selectedItems = selectedCheckboxes.map(checkbox => checkbox.value);
     return selectedItems;
 }
-export { clearSelection, updateSelectedCount, requestSelection, editSelection, deleteSelection };
+function editItem(item_id) {
+    window.location.href = `/edit_item.html?id=${item_id}`;
+}
+;
+export { editItem, clearSelection, updateSelectedCount, requestSelection, editSelection, deleteSelection };

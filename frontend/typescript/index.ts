@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (isAuthenticated) {
         // User is authenticated
-        profileImage.src = "/path/to/profile/photo.jpg";
+        profileImage.src = "../images/generic_user.png";
         profileName.textContent = username;
 
         dropdownMenu.innerHTML = `

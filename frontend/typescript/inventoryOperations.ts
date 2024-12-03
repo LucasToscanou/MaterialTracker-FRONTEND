@@ -13,6 +13,7 @@ function updateSelectedCount() {
     const selectedCountElement = document.getElementById('qty-selected');
     const selectedCount = getSelectedItems().length;
 
+    console.log("selectedCount:", selectedCount);
     if (selectedCountElement) {
         if (selectedCount === 0) {
             selectedCountElement.innerText = '';
@@ -95,10 +96,6 @@ function deleteSelection() {
         .catch(error => console.error('Error:', error));
 }
 
-
-
-
-
 function getSelectedItems(): string[] {
     const checkboxes = document.querySelectorAll<HTMLInputElement>('.checkbox');
     const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
@@ -108,4 +105,9 @@ function getSelectedItems(): string[] {
 }
 
 
-export { clearSelection, updateSelectedCount, requestSelection, editSelection, deleteSelection };
+function editItem(item_id: string): void {
+    window.location.href = `/edit_item.html?id=${item_id}`;
+};
+
+    
+export { editItem, clearSelection, updateSelectedCount, requestSelection, editSelection, deleteSelection };

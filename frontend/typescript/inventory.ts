@@ -1,33 +1,39 @@
 // Import constants
-import { backendAddress } from './constants.js';
+import { backendAddress, Material, UserProfile, Project, Location, MaterialImg, Currency } from './constants.js';
 import { checkAuthentication } from './authUtils.js';
-import { clearSelection, updateSelectedCount, requestSelection, editSelection, deleteSelection } from './inventoryOperations.js';
+import { clearSelection, updateSelectedCount, editItem, deleteSelection } from './inventoryOperations.js';
+import { getFieldOptions } from './add_item.js'
 
 // // Example Data
-const columns: string[] = ["Ref", "Description", "Capacity", "Project", "Current Location", "Quality Exp Date", "Cost"];
+const columns: string[] = ["Ref", "Description", "Project", "Current Location", "Quality Exp Date", "Cost"];
 
 
-// Define Material type
-type Material = {
+interface MaterialMore extends Material {
     id: number;
     mainImg: string;
-    ref: string;
-    description: string;
-    capacity: string;
-    project: string;
-    currentLocation: string;
-    qualityExpDate: string;
-    cost: string;
-    currency: string;
 };
 
+
 // Initialize page
-const initializePage = (): void => {
+let fieldoptions: {
+    userProfiles: UserProfile[] | null;
+    projects: Project[] | null;
+    locations: Location[] | null;
+    materialImgs: MaterialImg[] | null;
+    currencies: Currency[] | null;
+} = {
+    userProfiles: null,
+    projects: null,
+    locations: null,
+    materialImgs: null,
+    currencies: null,
+};
+const initializePage = async (): Promise<void> => {
+    fieldoptions = await getFieldOptions();
     fillHeader();
     populateColumns();
 
-    populateMaterials();
-    handleTableActions();
+    await populateMaterials();
 };
 
 // Call initializePage when the DOM is fully loaded
@@ -63,7 +69,8 @@ const populateColumns = (): void => {
 
 
 // Populate materials table
-const populateMaterials = (): void => {
+
+const populateMaterials = async (): Promise<void> => {
     const materialsTbody = document.getElementById("materials-tbody")!;
     const token = localStorage.getItem("token");
 
@@ -79,33 +86,34 @@ const populateMaterials = (): void => {
             }
             return response.json();
         })
-        .then((materials: Material[]) => {
+        .then((materials: MaterialMore[]) => {
             materials.forEach((material) => {
                 const row = document.createElement("tr");
+
                 row.innerHTML = `
                     <td>
                         <input type="checkbox" class="checkbox" value="${material.id}">
                     </td>
                     <td>
-                        <img src="${material.mainImg}" class="border rounded" style="height: 100px;" alt="Material Image">
+                        <img src="./images/generic_item.jpg" class="border rounded" style="height: 100px;" alt="Material Image">
                     </td>
                     <td>${material.ref}</td>
                     <td>${material.description}</td>
-                    <td>${material.capacity}</td>
-                    <td>${material.project}</td>
-                    <td>${material.currentLocation}</td>
-                    <td>${material.qualityExpDate}</td>
-                    <td>${material.cost} ${material.currency}</td>
+                    <td>${fieldoptions.projects ? fieldoptions.projects[material.project].name : 'N/A'}</td>
+                    <td>${fieldoptions.locations ? fieldoptions.locations.find(loc => loc.id === material.current_location)?.name : 'N/A'}</td>
+                    <td>${new Date(material.quality_exp_date).toISOString().split('T')[0]}</td>
+                    <td>${material.cost} ${fieldoptions.currencies ? fieldoptions.currencies[material.currency]?.name : 'N/A'}</td>
                     <td>
                         <button class="btn btn-secondary" data-action="edit" data-id="${material.id}">Edit</button>
-                        <button class="btn btn-secondary" data-action="request" data-id="${material.id}">Request</button>
-                        <button class="btn btn-secondary" data-action="delete" data-id="${material.id}">Delete</button>
                     </td>`;
                 materialsTbody.appendChild(row);
             });
         })
         .catch((error) => {
             console.error("Error populating materials:", error);
+        })
+        .finally(() => {
+            handleTableActions();
         });
 };
 
@@ -117,16 +125,25 @@ const reloadMaterialsTable = (): void => {
 
 // Event listener for action buttons
 const handleTableActions = (): void => {
-    document.getElementById("request-selection-btn")?.addEventListener("click", requestSelection);
-    document.getElementById("edit-selection-btn")?.addEventListener("click", editSelection);
+    // document.getElementById("request-selection-btn")?.addEventListener("click", requestSelection);
+    // document.getElementById("edit-selection-btn")?.addEventListener("click", editSelection);
     document.getElementById("delete-selection-btn")?.addEventListener("click", deleteSelection);
-    document.getElementById("request-selection")?.addEventListener("change", requestSelection);
 
     document.getElementById("clear-btn")?.addEventListener("click", clearSelection);
 
     const checkboxes = document.querySelectorAll<HTMLInputElement>('.checkbox');
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateSelectedCount);
+    });
+
+    const editButtons = document.querySelectorAll<HTMLButtonElement>('button[data-action="edit"]');
+    editButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const materialId = (event.currentTarget as HTMLButtonElement).dataset.id;
+            if (materialId) {
+                editItem(materialId);
+            }
+        });
     });
 };
 
@@ -142,7 +159,7 @@ async function fillHeader() {
 
     if (isAuthenticated) {
         // User is authenticated
-        profileImage.src = "/path/to/profile/photo.jpg";
+        profileImage.src = "../images/generic_user.png";
         profileName.textContent = username;
 
         dropdownMenu.innerHTML = `
