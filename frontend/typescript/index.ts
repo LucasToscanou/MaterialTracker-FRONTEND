@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileName.textContent = "";
 
         dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="/login.html">Sign in</a></li>
-            <li><a class="dropdown-item" href="/register.html">Register</a></li>
+            <li><a class="dropdown-item" href="login.html">Sign in</a></li>
+            <li><a class="dropdown-item" href="register.html">Register</a></li>
         `;
 
         heroSection.innerHTML = `

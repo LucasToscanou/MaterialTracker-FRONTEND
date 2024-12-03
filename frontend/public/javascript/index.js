@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileImage.src = "../images/generic_user.png";
         profileName.textContent = "";
         dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="/login.html">Sign in</a></li>
-            <li><a class="dropdown-item" href="/register.html">Register</a></li>
+            <li><a class="dropdown-item" href="login.html">Sign in</a></li>
+            <li><a class="dropdown-item" href="register.html">Register</a></li>
         `;
         heroSection.innerHTML = `
             <h1 class="display-1 fw-bolder text-body-emphasis">Material Tracker</h1>
