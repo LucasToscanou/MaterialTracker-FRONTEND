@@ -11,41 +11,89 @@ document.addEventListener("DOMContentLoaded", async () => {
         // User is authenticated
         profileImage.src = "../images/generic_user.png";
         profileName.textContent = username;
-        dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="/passwordChange.html">Change password</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/logout.html">Sign out</a></li>
-        `;
-        heroSection.innerHTML = `
-            <h1 class="display-1 fw-bolder text-body-emphasis">Material Tracker</h1>
-            <div class="col-lg-6 mx-auto">
-                <p class="display-5 fw-bold mb-4 text-body-emphasis">Store, Find, Book</p>
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                    <a href="inventory.html">
-                        <button type="button" class="btn btn-primary btn-lg px-4">Go to inventory</button>
-                    </a>
-                </div>
-            </div>
-        `;
+        dropdownMenu.innerHTML = '';
+        const changePasswordItem = document.createElement('li');
+        const changePasswordLink = document.createElement('a');
+        changePasswordLink.className = 'dropdown-item';
+        changePasswordLink.href = '/passwordChange.html';
+        changePasswordLink.textContent = 'Change password';
+        changePasswordItem.appendChild(changePasswordLink);
+        dropdownMenu.appendChild(changePasswordItem);
+        const divider = document.createElement('hr');
+        divider.className = 'dropdown-divider';
+        dropdownMenu.appendChild(divider);
+        const signOutItem = document.createElement('li');
+        const signOutLink = document.createElement('a');
+        signOutLink.className = 'dropdown-item';
+        signOutLink.href = '/logout.html';
+        signOutLink.textContent = 'Sign out';
+        signOutItem.appendChild(signOutLink);
+        dropdownMenu.appendChild(signOutItem);
+        heroSection.innerHTML = '';
+        const heroTitle = document.createElement('h1');
+        heroTitle.className = 'display-1 fw-bolder text-body-emphasis';
+        heroTitle.textContent = 'Material Tracker';
+        heroSection.appendChild(heroTitle);
+        const heroContent = document.createElement('div');
+        heroContent.className = 'col-lg-6 mx-auto';
+        heroSection.appendChild(heroContent);
+        const heroSubtitle = document.createElement('p');
+        heroSubtitle.className = 'display-5 fw-bold mb-4 text-body-emphasis';
+        heroSubtitle.textContent = 'Store, Find, Book';
+        heroContent.appendChild(heroSubtitle);
+        const heroButtonContainer = document.createElement('div');
+        heroButtonContainer.className = 'd-grid gap-2 d-sm-flex justify-content-sm-center';
+        heroContent.appendChild(heroButtonContainer);
+        const inventoryLink = document.createElement('a');
+        inventoryLink.href = 'inventory.html';
+        heroButtonContainer.appendChild(inventoryLink);
+        const inventoryButton = document.createElement('button');
+        inventoryButton.type = 'button';
+        inventoryButton.className = 'btn btn-primary btn-lg px-4';
+        inventoryButton.textContent = 'Go to inventory';
+        inventoryLink.appendChild(inventoryButton);
     }
     else {
         // User is not authenticated
         profileImage.src = "../images/generic_user.png";
         profileName.textContent = "";
-        dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="login.html">Sign in</a></li>
-            <li><a class="dropdown-item" href="register.html">Register</a></li>
-        `;
-        heroSection.innerHTML = `
-            <h1 class="display-1 fw-bolder text-body-emphasis">Material Tracker</h1>
-            <div class="col-lg-6 mx-auto">
-                <p class="display-5 fw-bold mb-4 text-body-emphasis">Store, Find, Book</p>
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                    <a href="/login.html">
-                        <button type="button" class="btn btn-primary btn-lg px-4">Sign in</button>
-                    </a>
-                </div>
-            </div>
-        `;
+        dropdownMenu.innerHTML = '';
+        const signInItem = document.createElement('li');
+        const signInLink = document.createElement('a');
+        signInLink.className = 'dropdown-item';
+        signInLink.href = 'login.html';
+        signInLink.textContent = 'Sign in';
+        signInItem.appendChild(signInLink);
+        dropdownMenu.appendChild(signInItem);
+        const registerItem = document.createElement('li');
+        const registerLink = document.createElement('a');
+        registerLink.className = 'dropdown-item';
+        registerLink.href = 'register.html';
+        registerLink.textContent = 'Register';
+        registerItem.appendChild(registerLink);
+        dropdownMenu.appendChild(registerItem);
+        heroSection.innerHTML = '';
+        const heroTitle = document.createElement('h1');
+        heroTitle.className = 'display-1 fw-bolder text-body-emphasis';
+        heroTitle.textContent = 'Material Tracker';
+        heroSection.appendChild(heroTitle);
+        const heroContent = document.createElement('div');
+        heroContent.className = 'col-lg-6 mx-auto';
+        heroSection.appendChild(heroContent);
+        const heroSubtitle = document.createElement('p');
+        heroSubtitle.className = 'display-5 fw-bold mb-4 text-body-emphasis';
+        heroSubtitle.textContent = 'Store, Find, Book';
+        heroContent.appendChild(heroSubtitle);
+        const heroButtonContainer = document.createElement('div');
+        heroButtonContainer.className = 'd-grid gap-2 d-sm-flex justify-content-sm-center';
+        heroContent.appendChild(heroButtonContainer);
+        const loginLink = document.createElement('a');
+        loginLink.href = '/login.html';
+        heroButtonContainer.appendChild(loginLink);
+        const loginButton = document.createElement('button');
+        loginButton.type = 'button';
+        loginButton.className = 'btn btn-primary btn-lg px-4';
+        loginButton.textContent = 'Sign in';
+        loginLink.appendChild(loginButton);
     }
 });

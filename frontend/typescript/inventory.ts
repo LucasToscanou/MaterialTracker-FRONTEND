@@ -2,17 +2,15 @@
 import { backendAddress, Material, UserProfile, Project, Location, MaterialImg, Currency } from './constants.js';
 import { checkAuthentication } from './authUtils.js';
 import { clearSelection, updateSelectedCount, editItem, deleteSelection } from './inventoryOperations.js';
-import { getFieldOptions } from './add_item.js'
+import { getFieldOptions } from './add_item.js';
 
-// // Example Data
+// Example Data
 const columns: string[] = ["Ref", "Description", "Project", "Current Location", "Quality Exp Date", "Cost"];
-
 
 interface MaterialMore extends Material {
     id: number;
     mainImg: string;
 };
-
 
 // Initialize page
 let fieldoptions: {
@@ -28,93 +26,156 @@ let fieldoptions: {
     materialImgs: null,
     currencies: null,
 };
+
 const initializePage = async (): Promise<void> => {
     fieldoptions = await getFieldOptions();
     fillHeader();
     populateColumns();
-
     await populateMaterials();
 };
 
 // Call initializePage when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", initializePage);
 
-
-
 const populateColumns = (): void => {
     const columnsRow = document.getElementById("columns-row")!;
     columns.forEach((col) => {
         const th = document.createElement("th");
-        th.innerHTML = `
-        <div class="dropdown text-end">
-          <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            <span>${col}</span>
-          </a>
-          <ul class="dropdown-menu text-small">
-            <li><a class="dropdown-item" href="#">Sort Ascending</a></li>
-            <li><a class="dropdown-item" href="#">Sort Descending</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <form class="dropdown-item d-flex align-items-center">
-                <input type="text" class="form-control me-2" placeholder="Filter">
-                <button type="submit" class="btn btn-primary">Filter</button>
-              </form>
-            </li>
-          </ul>
-        </div>`;
+        const dropdown = document.createElement("div");
+        dropdown.className = "dropdown text-end";
+
+        const link = document.createElement("a");
+        link.href = "#";
+        link.className = "d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center";
+        link.setAttribute("data-bs-toggle", "dropdown");
+        link.setAttribute("aria-expanded", "false");
+        link.innerHTML = `<span>${col}</span>`;
+        dropdown.appendChild(link);
+
+        const dropdownMenu = document.createElement("ul");
+        dropdownMenu.className = "dropdown-menu text-small";
+
+        const sortAsc = document.createElement("li");
+        const sortAscLink = document.createElement("a");
+        sortAscLink.className = "dropdown-item";
+        sortAscLink.href = "#";
+        sortAscLink.textContent = "Sort Ascending";
+        sortAsc.appendChild(sortAscLink);
+        dropdownMenu.appendChild(sortAsc);
+
+        const sortDesc = document.createElement("li");
+        const sortDescLink = document.createElement("a");
+        sortDescLink.className = "dropdown-item";
+        sortDescLink.href = "#";
+        sortDescLink.textContent = "Sort Descending";
+        sortDesc.appendChild(sortDescLink);
+        dropdownMenu.appendChild(sortDesc);
+
+        const divider = document.createElement("li");
+        const hr = document.createElement("hr");
+        hr.className = "dropdown-divider";
+        divider.appendChild(hr);
+        dropdownMenu.appendChild(divider);
+
+        const filterItem = document.createElement("li");
+        const filterForm = document.createElement("form");
+        filterForm.className = "dropdown-item d-flex align-items-center";
+        const filterInput = document.createElement("input");
+        filterInput.type = "text";
+        filterInput.className = "form-control me-2";
+        filterInput.placeholder = "Filter";
+        const filterButton = document.createElement("button");
+        filterButton.type = "submit";
+        filterButton.className = "btn btn-primary";
+        filterButton.textContent = "Filter";
+        filterForm.appendChild(filterInput);
+        filterForm.appendChild(filterButton);
+        filterItem.appendChild(filterForm);
+        dropdownMenu.appendChild(filterItem);
+
+        dropdown.appendChild(dropdownMenu);
+        th.appendChild(dropdown);
         columnsRow.appendChild(th);
     });
 };
-
-
-// Populate materials table
 
 const populateMaterials = async (): Promise<void> => {
     const materialsTbody = document.getElementById("materials-tbody")!;
     const token = localStorage.getItem("token");
 
-    fetch(backendAddress + "material/list/", {
-        method: "GET",
-        headers: {
-            "Authorization": `Token ${token}`,
-        },
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Failed to fetch materials");
-            }
-            return response.json();
-        })
-        .then((materials: MaterialMore[]) => {
-            materials.forEach((material) => {
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-                    <td>
-                        <input type="checkbox" class="checkbox" value="${material.id}">
-                    </td>
-                    <td>
-                        <img src="./images/generic_item.jpg" class="border rounded" style="height: 100px;" alt="Material Image">
-                    </td>
-                    <td>${material.ref}</td>
-                    <td>${material.description}</td>
-                    <td>${fieldoptions.projects ? fieldoptions.projects[material.project].name : 'N/A'}</td>
-                    <td>${fieldoptions.locations ? fieldoptions.locations.find(loc => loc.id === material.current_location)?.name : 'N/A'}</td>
-                    <td>${new Date(material.quality_exp_date).toISOString().split('T')[0]}</td>
-                    <td>${material.cost} ${fieldoptions.currencies ? fieldoptions.currencies[material.currency]?.name : 'N/A'}</td>
-                    <td>
-                        <button class="btn btn-secondary" data-action="edit" data-id="${material.id}">Edit</button>
-                    </td>`;
-                materialsTbody.appendChild(row);
-            });
-        })
-        .catch((error) => {
-            console.error("Error populating materials:", error);
-        })
-        .finally(() => {
-            handleTableActions();
+    try {
+        const response = await fetch(backendAddress + "material/list/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Token ${token}`,
+            },
         });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch materials");
+        }
+
+        const materials: MaterialMore[] = await response.json();
+        materials.forEach((material) => {
+            const row = document.createElement("tr");
+
+            const checkboxCell = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "checkbox";
+            checkbox.value = material.id.toString();
+            checkboxCell.appendChild(checkbox);
+            row.appendChild(checkboxCell);
+
+            const imgCell = document.createElement("td");
+            const img = document.createElement("img");
+            img.src = "./images/generic_item.jpg";
+            img.className = "border rounded";
+            img.style.height = "100px";
+            img.alt = "Material Image";
+            imgCell.appendChild(img);
+            row.appendChild(imgCell);
+
+            const refCell = document.createElement("td");
+            refCell.textContent = material.ref;
+            row.appendChild(refCell);
+
+            const descCell = document.createElement("td");
+            descCell.textContent = material.description;
+            row.appendChild(descCell);
+
+            const projectCell = document.createElement("td");
+            projectCell.textContent = fieldoptions.projects ? fieldoptions.projects[material.project].name : 'N/A';
+            row.appendChild(projectCell);
+
+            const locationCell = document.createElement("td");
+            locationCell.textContent = fieldoptions.locations ? fieldoptions.locations.find(loc => loc.id === material.current_location)?.name : 'N/A';
+            row.appendChild(locationCell);
+
+            const qualityExpDateCell = document.createElement("td");
+            qualityExpDateCell.textContent = new Date(material.quality_exp_date).toISOString().split('T')[0];
+            row.appendChild(qualityExpDateCell);
+
+            const costCell = document.createElement("td");
+            costCell.textContent = `${material.cost} ${fieldoptions.currencies ? fieldoptions.currencies[material.currency]?.name : 'N/A'}`;
+            row.appendChild(costCell);
+
+            const actionCell = document.createElement("td");
+            const editButton = document.createElement("button");
+            editButton.className = "btn btn-secondary";
+            editButton.dataset.action = "edit";
+            editButton.dataset.id = material.id.toString();
+            editButton.textContent = "Edit";
+            actionCell.appendChild(editButton);
+            row.appendChild(actionCell);
+
+            materialsTbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Error populating materials:", error);
+    } finally {
+        handleTableActions();
+    }
 };
 
 const reloadMaterialsTable = (): void => {
@@ -125,10 +186,7 @@ const reloadMaterialsTable = (): void => {
 
 // Event listener for action buttons
 const handleTableActions = (): void => {
-    // document.getElementById("request-selection-btn")?.addEventListener("click", requestSelection);
-    // document.getElementById("edit-selection-btn")?.addEventListener("click", editSelection);
     document.getElementById("delete-selection-btn")?.addEventListener("click", deleteSelection);
-
     document.getElementById("clear-btn")?.addEventListener("click", clearSelection);
 
     const checkboxes = document.querySelectorAll<HTMLInputElement>('.checkbox');
@@ -147,8 +205,6 @@ const handleTableActions = (): void => {
     });
 };
 
-
-
 async function fillHeader() {
     const { isAuthenticated, username } = await checkAuthentication();
 
@@ -162,20 +218,47 @@ async function fillHeader() {
         profileImage.src = "../images/generic_user.png";
         profileName.textContent = username;
 
-        dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="/passwordChange.html">Change password</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/logout.html">Sign out</a></li>
-        `;
+        dropdownMenu.innerHTML = '';
+        const changePasswordItem = document.createElement('li');
+        const changePasswordLink = document.createElement('a');
+        changePasswordLink.className = 'dropdown-item';
+        changePasswordLink.href = '/passwordChange.html';
+        changePasswordLink.textContent = 'Change password';
+        changePasswordItem.appendChild(changePasswordLink);
+        dropdownMenu.appendChild(changePasswordItem);
+
+        const divider = document.createElement('hr');
+        divider.className = 'dropdown-divider';
+        dropdownMenu.appendChild(divider);
+
+        const signOutItem = document.createElement('li');
+        const signOutLink = document.createElement('a');
+        signOutLink.className = 'dropdown-item';
+        signOutLink.href = '/logout.html';
+        signOutLink.textContent = 'Sign out';
+        signOutItem.appendChild(signOutLink);
+        dropdownMenu.appendChild(signOutItem);
     } else {
         // User is not authenticated
         profileImage.src = "../images/generic_user.png";
         profileName.textContent = "";
 
-        dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="/login.html">Sign in</a></li>
-            <li><a class="dropdown-item" href="/register.html">Register</a></li>
-        `;
+        dropdownMenu.innerHTML = '';
+        const signInItem = document.createElement('li');
+        const signInLink = document.createElement('a');
+        signInLink.className = 'dropdown-item';
+        signInLink.href = 'login.html';
+        signInLink.textContent = 'Sign in';
+        signInItem.appendChild(signInLink);
+        dropdownMenu.appendChild(signInItem);
+
+        const registerItem = document.createElement('li');
+        const registerLink = document.createElement('a');
+        registerLink.className = 'dropdown-item';
+        registerLink.href = 'register.html';
+        registerLink.textContent = 'Register';
+        registerItem.appendChild(registerLink);
+        dropdownMenu.appendChild(registerItem);
     }
 }
 

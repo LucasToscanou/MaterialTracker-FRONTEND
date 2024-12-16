@@ -6,24 +6,22 @@ const initializePage = async () => {
     const { isAuthenticated, username } = await checkAuthentication();
     if (isAuthenticated) {
         const token = localStorage.getItem("token");
-        fetch(backendAddress + "project/current/", {
-            method: "GET",
-            headers: {
-                "Authorization": `Token ${token}`,
-            },
-        })
-            .then((response) => {
+        try {
+            const response = await fetch(backendAddress + "project/current/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                },
+            });
             if (!response.ok) {
                 throw new Error("Failed to fetch current project");
             }
-            return response.json();
-        })
-            .then((project) => {
+            const project = await response.json();
             document.getElementById("project-name").textContent = project.name;
-        })
-            .catch((error) => {
+        }
+        catch (error) {
             console.error("Error fetching current project:", error);
-        });
+        }
     }
     fillHeader();
     populateColumns();
@@ -34,24 +32,53 @@ const populateColumns = () => {
     const columnsRow = document.getElementById("columns-row");
     columns.forEach((col) => {
         const th = document.createElement("th");
-        th.innerHTML = `
-        <div class="dropdown text-end">
-          <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            <span>${col}</span>
-          </a>
-          <ul class="dropdown-menu text-small">
-            <li><a class="dropdown-item" href="#">Sort Ascending</a></li>
-            <li><a class="dropdown-item" href="#">Sort Descending</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <form class="dropdown-item d-flex align-items-center">
-                <input type="text" class="form-control me-2" placeholder="Filter">
-                <button type="submit" class="btn btn-primary">Filter</button>
-              </form>
-            </li>
-          </ul>
-        </div>`;
+        const dropdown = document.createElement("div");
+        dropdown.className = "dropdown text-end";
+        const link = document.createElement("a");
+        link.href = "#";
+        link.className = "d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center";
+        link.setAttribute("data-bs-toggle", "dropdown");
+        link.setAttribute("aria-expanded", "false");
+        link.innerHTML = `<span>${col}</span>`;
+        dropdown.appendChild(link);
+        const dropdownMenu = document.createElement("ul");
+        dropdownMenu.className = "dropdown-menu text-small";
+        const sortAsc = document.createElement("li");
+        const sortAscLink = document.createElement("a");
+        sortAscLink.className = "dropdown-item";
+        sortAscLink.href = "#";
+        sortAscLink.textContent = "Sort Ascending";
+        sortAsc.appendChild(sortAscLink);
+        dropdownMenu.appendChild(sortAsc);
+        const sortDesc = document.createElement("li");
+        const sortDescLink = document.createElement("a");
+        sortDescLink.className = "dropdown-item";
+        sortDescLink.href = "#";
+        sortDescLink.textContent = "Sort Descending";
+        sortDesc.appendChild(sortDescLink);
+        dropdownMenu.appendChild(sortDesc);
+        const divider = document.createElement("li");
+        const hr = document.createElement("hr");
+        hr.className = "dropdown-divider";
+        divider.appendChild(hr);
+        dropdownMenu.appendChild(divider);
+        const filterItem = document.createElement("li");
+        const filterForm = document.createElement("form");
+        filterForm.className = "dropdown-item d-flex align-items-center";
+        const filterInput = document.createElement("input");
+        filterInput.type = "text";
+        filterInput.className = "form-control me-2";
+        filterInput.placeholder = "Filter";
+        const filterButton = document.createElement("button");
+        filterButton.type = "submit";
+        filterButton.className = "btn btn-primary";
+        filterButton.textContent = "Filter";
+        filterForm.appendChild(filterInput);
+        filterForm.appendChild(filterButton);
+        filterItem.appendChild(filterForm);
+        dropdownMenu.appendChild(filterItem);
+        dropdown.appendChild(dropdownMenu);
+        th.appendChild(dropdown);
         columnsRow.appendChild(th);
     });
 };
@@ -65,75 +92,105 @@ async function fillHeader() {
         // User is authenticated
         profileImage.src = "../images/generic_user.png";
         profileName.textContent = username;
-        dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="/passwordChange.html">Change password</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/logout.html">Sign out</a></li>
-        `;
+        dropdownMenu.innerHTML = '';
+        const changePasswordItem = document.createElement('li');
+        const changePasswordLink = document.createElement('a');
+        changePasswordLink.className = 'dropdown-item';
+        changePasswordLink.href = '/passwordChange.html';
+        changePasswordLink.textContent = 'Change password';
+        changePasswordItem.appendChild(changePasswordLink);
+        dropdownMenu.appendChild(changePasswordItem);
+        const divider = document.createElement('hr');
+        divider.className = 'dropdown-divider';
+        dropdownMenu.appendChild(divider);
+        const signOutItem = document.createElement('li');
+        const signOutLink = document.createElement('a');
+        signOutLink.className = 'dropdown-item';
+        signOutLink.href = '/logout.html';
+        signOutLink.textContent = 'Sign out';
+        signOutItem.appendChild(signOutLink);
+        dropdownMenu.appendChild(signOutItem);
     }
     else {
         // User is not authenticated
         profileImage.src = "../images/generic_user.png";
         profileName.textContent = "";
-        dropdownMenu.innerHTML = `
-            <li><a class="dropdown-item" href="/login.html">Sign in</a></li>
-            <li><a class="dropdown-item" href="/register.html">Register</a></li>
-        `;
+        dropdownMenu.innerHTML = '';
+        const signInItem = document.createElement('li');
+        const signInLink = document.createElement('a');
+        signInLink.className = 'dropdown-item';
+        signInLink.href = 'login.html';
+        signInLink.textContent = 'Sign in';
+        signInItem.appendChild(signInLink);
+        dropdownMenu.appendChild(signInItem);
+        const registerItem = document.createElement('li');
+        const registerLink = document.createElement('a');
+        registerLink.className = 'dropdown-item';
+        registerLink.href = 'register.html';
+        registerLink.textContent = 'Register';
+        registerItem.appendChild(registerLink);
+        dropdownMenu.appendChild(registerItem);
     }
 }
 const populatePeople = async () => {
     const peopleTbody = document.getElementById("people-tbody");
     const token = localStorage.getItem("token");
-    fetch(backendAddress + `${backendAddress}userprofiles/${user_id}/`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Token ${token}`,
-        },
-    })
-        .then((response) => {
+    try {
+        const response = await fetch(backendAddress + "userprofiles/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Token ${token}`,
+            },
+        });
         if (!response.ok) {
             throw new Error("Failed to fetch people");
         }
-        return response.json();
-    })
-        .then((people) => {
+        const people = await response.json();
         people.forEach((person) => {
             const row = document.createElement("tr");
-            row.innerHTML = `
-                    <td>${person.id}</td>
-                    <td>${person.username}</td>
-                    <td>${person.email}</td>`;
+            const idCell = document.createElement("td");
+            idCell.textContent = person.id.toString();
+            row.appendChild(idCell);
+            const usernameCell = document.createElement("td");
+            usernameCell.textContent = person.username;
+            row.appendChild(usernameCell);
+            const emailCell = document.createElement("td");
+            emailCell.textContent = person.email;
+            row.appendChild(emailCell);
             peopleTbody.appendChild(row);
         });
-    })
-        .catch((error) => {
+    }
+    catch (error) {
         console.error("Error populating people:", error);
-    });
-    fetch(backendAddress + `${backendAddress}projects/people/${user_project}/`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Token ${token}`,
-        },
-    })
-        .then((response) => {
+    }
+    try {
+        const response = await fetch(backendAddress + "projects/people/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Token ${token}`,
+            },
+        });
         if (!response.ok) {
             throw new Error("Failed to fetch people");
         }
-        return response.json();
-    })
-        .then((people) => {
+        const people = await response.json();
         people.forEach((person) => {
             const row = document.createElement("tr");
-            row.innerHTML = `
-                    <td>${person.id}</td>
-                    <td>${person.username}</td>
-                    <td>${person.email}</td>`;
+            const idCell = document.createElement("td");
+            idCell.textContent = person.id.toString();
+            row.appendChild(idCell);
+            const usernameCell = document.createElement("td");
+            usernameCell.textContent = person.username;
+            row.appendChild(usernameCell);
+            const emailCell = document.createElement("td");
+            emailCell.textContent = person.email;
+            row.appendChild(emailCell);
             peopleTbody.appendChild(row);
         });
-    })
-        .catch((error) => {
+    }
+    catch (error) {
         console.error("Error populating people:", error);
-    });
+    }
 };
 // Call populatePeople when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", populatePeople);
